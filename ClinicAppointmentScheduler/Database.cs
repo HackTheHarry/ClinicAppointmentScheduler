@@ -7,9 +7,7 @@ namespace ClinicAppointmentScheduler
     public static class Database
     {
         private static string databasePath =
-            Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "clinic.db");
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "clinic.db");
 
         private static string connectionString =
             $"Data Source={databasePath}";
@@ -21,66 +19,55 @@ namespace ClinicAppointmentScheduler
 
         public static void InitializeDatabase()
         {
-            try
+            using (var connection = GetConnection())
             {
-                using (var connection = GetConnection())
+                connection.Open();
+
+                string createPatientsTable = @"
+                    CREATE TABLE IF NOT EXISTS Patients
+                    (
+                        PatientId INTEGER PRIMARY KEY AUTOINCREMENT,
+                        FullName TEXT NOT NULL,
+                        Age INTEGER,
+                        Gender TEXT,
+                        Phone TEXT,
+                        Address TEXT
+                    )";
+
+                string createDoctorsTable = @"
+                    CREATE TABLE IF NOT EXISTS Doctors
+                    (
+                        DoctorId INTEGER PRIMARY KEY AUTOINCREMENT,
+                        FullName TEXT NOT NULL,
+                        Specialization TEXT,
+                        Phone TEXT
+                    )";
+
+                string createAppointmentsTable = @"
+                    CREATE TABLE IF NOT EXISTS Appointments
+                    (
+                        AppointmentId INTEGER PRIMARY KEY AUTOINCREMENT,
+                        PatientId INTEGER NOT NULL,
+                        DoctorId INTEGER NOT NULL,
+                        AppointmentDate TEXT NOT NULL,
+                        AppointmentTime TEXT NOT NULL,
+                        Reason TEXT,
+                        Status TEXT,
+                        FOREIGN KEY (PatientId) REFERENCES Patients(PatientId),
+                        FOREIGN KEY (DoctorId) REFERENCES Doctors(DoctorId)
+                    )";
+
+                using (var command = connection.CreateCommand())
                 {
-                    connection.Open();
+                    command.CommandText = createPatientsTable;
+                    command.ExecuteNonQuery();
 
-                    string createPatientsTable = @"
-                        CREATE TABLE IF NOT EXISTS Patients
-                        (
-                            PatientId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            FullName TEXT NOT NULL,
-                            Age INTEGER,
-                            Gender TEXT,
-                            Phone TEXT,
-                            Address TEXT
-                        )";
+                    command.CommandText = createDoctorsTable;
+                    command.ExecuteNonQuery();
 
-                    string createDoctorsTable = @"
-                        CREATE TABLE IF NOT EXISTS Doctors
-                        (
-                            DoctorId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            FullName TEXT NOT NULL,
-                            Specialization TEXT,
-                            Phone TEXT
-                        )";
-
-                    string createAppointmentsTable = @"
-                        CREATE TABLE IF NOT EXISTS Appointments
-                        (
-                            AppointmentId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            PatientId INTEGER NOT NULL,
-                            DoctorId INTEGER NOT NULL,
-                            AppointmentDate TEXT NOT NULL,
-                            AppointmentTime TEXT NOT NULL,
-                            Reason TEXT,
-                            Status TEXT,
-                            FOREIGN KEY (PatientId)
-                                REFERENCES Patients(PatientId),
-                            FOREIGN KEY (DoctorId)
-                                REFERENCES Doctors(DoctorId)
-                        )";
-
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.CommandText = createPatientsTable;
-                        command.ExecuteNonQuery();
-
-                        command.CommandText = createDoctorsTable;
-                        command.ExecuteNonQuery();
-
-                        command.CommandText = createAppointmentsTable;
-                        command.ExecuteNonQuery();
-                    }
+                    command.CommandText = createAppointmentsTable;
+                    command.ExecuteNonQuery();
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(
-                    "Database initialization failed: " +
-                    ex.Message, ex);
             }
         }
     }

@@ -155,9 +155,9 @@
             // dgvDoctors
             // 
             dgvDoctors.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvDoctors.Location = new Point(82, 248);
+            dgvDoctors.Location = new Point(51, 248);
             dgvDoctors.Name = "dgvDoctors";
-            dgvDoctors.Size = new Size(459, 126);
+            dgvDoctors.Size = new Size(527, 126);
             dgvDoctors.TabIndex = 12;
             dgvDoctors.CellClick += dgvDoctors_CellClick;
             // 
