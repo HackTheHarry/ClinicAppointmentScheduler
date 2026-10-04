@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
-
+using ClinicAppointmentScheduler.Models;
 namespace ClinicAppointmentScheduler
 {
     public partial class PatientForm : Form
@@ -57,44 +57,65 @@ namespace ClinicAppointmentScheduler
                 return;
             }
 
-            using (var connection = Database.GetConnection())
+            try
             {
-                connection.Open();
-
-                string query = @"
-                    INSERT INTO Patients
-                    (FullName, Age, Gender, Phone, Address)
-                    VALUES
-                    (@name, @age, @gender, @phone, @address)";
-
-                using (var command =
-                    new SqliteCommand(query, connection))
+                Patient patient = new Patient
                 {
-                    command.Parameters.AddWithValue(
-                        "@name", txtName.Text);
+                    FullName = txtName.Text,
+                    Age = age,
+                    Gender = cmbGender.Text,
+                    Phone = txtPhone.Text,
+                    Address = txtAddress.Text
+                };
 
-                    command.Parameters.AddWithValue(
-                        "@age", age);
+                using (var connection = Database.GetConnection())
+                {
+                    connection.Open();
 
-                    command.Parameters.AddWithValue(
-                        "@gender", cmbGender.Text);
+                    string query = @"
+                INSERT INTO Patients
+                (FullName, Age, Gender, Phone, Address)
+                VALUES
+                (@name, @age, @gender, @phone, @address)";
 
-                    command.Parameters.AddWithValue(
-                        "@phone", txtPhone.Text);
+                    using (var command = new SqliteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue(
+                            "@name", patient.FullName);
 
-                    command.Parameters.AddWithValue(
-                        "@address", txtAddress.Text);
+                        command.Parameters.AddWithValue(
+                            "@age", patient.Age);
 
-                    command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue(
+                            "@gender", patient.Gender);
+
+                        command.Parameters.AddWithValue(
+                            "@phone", patient.Phone);
+
+                        command.Parameters.AddWithValue(
+                            "@address", patient.Address);
+
+                        command.ExecuteNonQuery();
+                    }
                 }
+
+                MessageBox.Show(
+                    patient.GetRoleDescription() +
+                    " added successfully.");
+
+                LoadPatients();
+                ClearFields();
             }
-
-            MessageBox.Show("Patient added successfully.");
-
-            LoadPatients();
-
-            ClearFields();
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to add patient.\n\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
+
 
         private void dgvPatients_CellClick(
             object sender,

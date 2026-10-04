@@ -1,3 +1,4 @@
+using ClinicAppointmentScheduler.Models;
 namespace ClinicAppointmentScheduler
 {
     public partial class MainForm : Form
@@ -5,6 +6,29 @@ namespace ClinicAppointmentScheduler
         public MainForm()
         {
             InitializeComponent();
+
+            DemonstratePolymorphism();
+        }
+        private void DemonstratePolymorphism()
+        {
+            Person patient = new Patient
+            {
+                FullName = "Sample Patient",
+                Age = 30,
+                Gender = "Male"
+            };
+
+            Person doctor = new Doctor
+            {
+                FullName = "Sample Doctor",
+                Specialization = "General Medicine"
+            };
+
+            string patientDescription =
+                patient.GetRoleDescription();
+
+            string doctorDescription =
+                doctor.GetRoleDescription();
         }
 
         private void btnPatients_Click(object sender, EventArgs e)

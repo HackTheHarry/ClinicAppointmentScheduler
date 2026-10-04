@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using System.Data;
+using ClinicAppointmentScheduler.Models;
 
 namespace ClinicAppointmentScheduler
 {
@@ -50,40 +51,55 @@ namespace ClinicAppointmentScheduler
                 return;
             }
 
-            using (var connection = Database.GetConnection())
+            try
             {
-                connection.Open();
-
-                string query = @"
-                    INSERT INTO Doctors
-                    (FullName, Specialization, Phone)
-                    VALUES
-                    (@name, @specialization, @phone)";
-
-                using (var command =
-                    new SqliteCommand(query, connection))
+                Doctor doctor = new Doctor
                 {
-                    command.Parameters.AddWithValue(
-                        "@name",
-                        txtDoctorName.Text);
+                    FullName = txtDoctorName.Text,
+                    Specialization = txtSpecialization.Text,
+                    Phone = txtDoctorPhone.Text
+                };
 
-                    command.Parameters.AddWithValue(
-                        "@specialization",
-                        txtSpecialization.Text);
+                using (var connection = Database.GetConnection())
+                {
+                    connection.Open();
 
-                    command.Parameters.AddWithValue(
-                        "@phone",
-                        txtDoctorPhone.Text);
+                    string query = @"
+                INSERT INTO Doctors
+                (FullName, Specialization, Phone)
+                VALUES
+                (@name, @specialization, @phone)";
 
-                    command.ExecuteNonQuery();
+                    using (var command = new SqliteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue(
+                            "@name", doctor.FullName);
+
+                        command.Parameters.AddWithValue(
+                            "@specialization", doctor.Specialization);
+
+                        command.Parameters.AddWithValue(
+                            "@phone", doctor.Phone);
+
+                        command.ExecuteNonQuery();
+                    }
                 }
+
+                MessageBox.Show(
+                    doctor.GetRoleDescription() +
+                    " added successfully.");
+
+                LoadDoctors();
+                ClearDoctorFields();
             }
-
-            MessageBox.Show("Doctor added successfully.");
-
-            LoadDoctors();
-
-            ClearDoctorFields();
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to add doctor.\n\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
 
         private void dgvDoctors_CellClick(
