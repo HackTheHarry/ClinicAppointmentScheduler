@@ -8,11 +8,23 @@ namespace ClinicAppointmentScheduler
         [STAThread]
         static void Main()
         {
-            ApplicationConfiguration.Initialize();
+            try
+            {
+                ApplicationConfiguration.Initialize();
 
-            Database.InitializeDatabase();
+                Database.InitializeDatabase();
 
-            Application.Run(new MainForm());
+                Application.Run(new MainForm());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "The application encountered an unexpected error.\n\n" +
+                    ex.Message,
+                    "Application Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
     }
 }
